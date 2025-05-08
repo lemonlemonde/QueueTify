@@ -9,6 +9,8 @@ services:
     environment:
       - POSTGRES_USER=lemonade
       - POSTGRES_PASSWORD=supersecureadminpassword
-      - POSTGRES_DB=taskresults
+      - POSTGRES_DB=playqueue
     ports:
       - "5432:5432"
+    volumes:
+      - ./init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
