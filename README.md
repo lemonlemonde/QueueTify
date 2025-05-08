@@ -14,13 +14,13 @@ Premise is something like:
 wow!
 
 
-#### I need more details
+## I need more details
 Too bad!
 (jk)
 
 Devlog and stuff are in your Obsidian repo, duh. It's called `orange` if you don't remember
 
-#### Tech stack:
+## Tech stack:
 - PostgreSQL
 - Ansible
 - Redis
