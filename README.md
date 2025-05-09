@@ -52,7 +52,6 @@ uv sync
 
 conda deactivate # if (base) is haunting you
 source .venv/bin/activate
-
 python worker/worker.py
 ```
 
@@ -66,3 +65,10 @@ python worker/worker.py
 # Example
 python jobs/submit_job.py 
 ```
+
+4. Look at results in browser
+```shell
+flask run
+```
+- Go to `http://127.0.0.1:5000/`
+- Reload every time

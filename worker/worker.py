@@ -60,6 +60,7 @@ def main():
         print("Exiting gracefully...")
     
     finally:
+        cur.close()
         postgres_conn.close()
             
     
