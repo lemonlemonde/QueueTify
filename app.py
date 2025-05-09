@@ -1,7 +1,19 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, flash, url_for, redirect
+
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, BooleanField
+from wtforms.validators import InputRequired
+
 import psycopg2
 
+from jobs.submit_job import submitJob
+
 app = Flask(__name__)
+# needed for form csrf_token
+app.config['SECRET_KEY'] = 'secretkey'
+
+class DescriptionForm(FlaskForm):
+    description = StringField('Description', validators=[InputRequired()])
 
 def getResults():
     postgres_conn = psycopg2.connect(
@@ -21,12 +33,21 @@ def getResults():
     return rows
     
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST']) 
 def dashboard():
     rows = getResults()
-    
     print(rows)
-    return render_template('index.html', rows=rows)
+    
+    form = DescriptionForm()
+    if form.validate_on_submit():
+        # actually submit
+        submitJob(form.description.data)
+        
+        flash(f"Successfully submitted description: {form.description.data}", "success")  
+        
+        return redirect(url_for('dashboard'))
+            
+    return render_template('index.html', rows=rows, form=form)
     
     
 if __name__ == "__main__":

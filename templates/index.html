@@ -1,11 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Hello, Flask!</title>
+    <title>Your future playlists</title>
 </head>
 <body>
     {% for id, result in rows %}
       <h3>{{id}}: {{result}}</h3>
     {% endfor %}
-  </body>
+
+    <br>
+
+    <form method="POST" action="/">
+        {{ form.csrf_token }}
+        {{ form.description.label }}
+        {{ form.description }}
+        <br>
+        <br>
+        {{ form.submit }}
+        <p><input type="submit" value="Submit"></p>
+    </form>
+</body>
 </html>

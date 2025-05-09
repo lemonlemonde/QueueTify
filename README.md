@@ -72,3 +72,8 @@ flask run
 ```
 - Go to `http://127.0.0.1:5000/`
 - Reload every time
+
+
+5. Clean up
+- don't do `docker compose down` if you want to persist your `postgres` db
+    - just `CTRL + C`

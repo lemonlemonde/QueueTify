@@ -1,13 +1,16 @@
 import redis
 import argparse
 
-def main(args):
+def submitJob(description):
     r = redis.Redis(host='localhost', port=6379, decode_responses=True)
 
-    print(f"Adding task for description: {args.description}")
-    r.rpush('task_queue', args.description)
+    print(f"Adding task for description: {description}")
+    r.rpush('task_queue', description)
     
     print(r.lrange('task_queue', 0, -1))
+
+def main(args):
+    submitJob(args.description)
     
     
 if __name__ == "__main__":
