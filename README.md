@@ -26,6 +26,7 @@ wow!
 # I need more details
 no
 (jk)
+More details in my Obsidian devlog
 
 ## Tech stack:
 - Gunicorn
