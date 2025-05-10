@@ -37,13 +37,19 @@ no
     - Flask-WTF
     - Flask-SocketIO
 
-## To be incorporated later:
-- Ansible
-- Make
-- Kubernetes
-- nginx
+
+## Other todo:
+- [ ] make sure `worker` and `flask-app` containers don't start until `postgres` fully set up
+- [ ] smaller images possible?
+    - e.g., alpine linux instead of full python:3?
+- [ ] use MCP, and maybe some Spotify API? to make actual playlists
+- [ ] nginx reverse proxy?
+- [ ] ansible, make, kubernetes?
 
 
 ## Architecture:
 ![image_overarching](./images/IMG_5318.jpg)
-![image_websocket](./images/IMG_5321.jpg)
+![image_websocket](./images/IMG_5324.jpg)
+ - needed to add a Flask-SocketIO connection (`flask-app` to the user's browser)
+    - otherwise, it's just a non-permanent browser session, and had issue with Flask.flash()
+	- same issue with `return redirect(url_for('dashboard'))`, if it's triggered by `worker`
