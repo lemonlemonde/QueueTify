@@ -1,5 +1,8 @@
+gunicorn
+eventlet
 psycopg2-binary
-flask-wtf
 flask
+flask-wtf
+flask-socketio
 redis
 requests

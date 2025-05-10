@@ -1,8 +1,10 @@
-from flask import Flask, render_template, flash, url_for, redirect, request
+from flask import Flask, jsonify, render_template, flash, url_for, redirect, request
 
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField
 from wtforms.validators import InputRequired
+
+from flask_socketio import SocketIO, emit
 
 import psycopg2
 
@@ -11,10 +13,16 @@ from submit_job import submitJob
 app = Flask(__name__)
 # needed for form csrf_token
 app.config['SECRET_KEY'] = 'secretkey'
+socketio = SocketIO(app)
+
+@socketio.on('connect_success')
+def handle_connect_success(json):
+    print('Successfully connected with browser: ' + str(json))
 
 class DescriptionForm(FlaskForm):
     description = StringField('Description', validators=[InputRequired()])
 
+@app.route('/results', methods=['GET'])
 def getResults():
     postgres_conn = psycopg2.connect(
         dbname='playqueue',
@@ -30,8 +38,7 @@ def getResults():
     
     cur.close()
     postgres_conn.close()
-    return rows
-    
+    return jsonify(rows)
 
 @app.route('/notify', methods=['POST'])
 def notify():
@@ -42,24 +49,21 @@ def notify():
     
     if status == 'success':
         # worker sucessfully pushed to db
-        flash("SUCCESS: Successfully generated new playlist name.", "success")  
-        redirect(url_for('dashboard'))
+        socketio.emit('new_result', {'data': "success"})
         
     elif status == 'interrupt':
         # worker was keyboard interrupted
-        flash("ERROR: Worker was keyboard interrupted!", "error")  
+        socketio.emit('error', {'data': "interrupt"})
         
     elif status == 'error':
         # worker ran into error while pushing to db
         error = data.get('error')
-        flash(f"ERROR: Worker ran into an error!: {error}", "error")
+        socketio.emit('error', {'data': str(error)})
     
     return '', 200
 
 @app.route('/', methods=['GET', 'POST']) 
 def dashboard():
-    rows = getResults()
-    
     form = DescriptionForm()
     if form.validate_on_submit():
         # actually submit
@@ -69,8 +73,9 @@ def dashboard():
         
         return redirect(url_for('dashboard'))
             
-    return render_template('index.html', rows=rows, form=form)
+    return render_template('index.html', form=form)
     
     
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    # app.run(host="0.0.0.0", port=5000, debug=True)
+    socketio.run(app, host="0.0.0.0", port=5000, debug=True)

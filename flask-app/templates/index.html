@@ -1,22 +1,78 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+<script type="text/javascript" charset="utf-8">
+
+    function getResults() {
+        // request results from API endpoint now
+        const url = 'http://localhost:5000/results'
+            fetch(url)
+            .then(response => response.json())  
+            .then(json => {
+                console.log(json);
+
+                // clear existing table
+                let resultDiv = document.getElementById("results")
+                resultDiv.innerHTML = "";
+                
+                // construct table per row
+                let list = document.createElement("ul");
+                json.forEach(function(row) {
+                    let item = document.createElement("li");
+                    item.textContent = `${row[0]}: ${row[1]}`;
+                    list.appendChild(item);
+                });
+                resultDiv.appendChild(list);
+            })
+    }
+
+    var socket = io();
+    
+    socket.on('connect', function() {
+        socket.emit('connect_success', {data: 'I\'m connected!'});
+        // first render for existing database vals
+        getResults()
+    });
+
+    // from `/notify`
+    socket.on('new_result', function(data_json) {
+        getResults()
+    });
+
+    // display errors
+    socket.on('error', function(data_json) {
+        error_msg = data_json['data']
+
+        // clear prev error, if any
+        let errorDiv = document.getElementById("error");
+        errorDiv.innerHTML = "";
+
+        // um add the error
+        ele = document.createElement("p");
+        ele.textContent = `${error_msg}`;
+        errorDiv.appendChild(ele);
+    })
+</script>
+
 <!DOCTYPE html>
 <html>
 <head>
     <title>Your future playlists</title>
 </head>
 <body>
-    {% for id, result in rows %}
-      <h3>{{id}}: {{result}}</h3>
-    {% endfor %}
-
+    <!-- placeholder for results as they come in -->
+    <div id="results"></div>
+    
+    <br>    
+    <!-- placeholder for 1 error only -->
+    <div id="error"></div>
+    
     <br>
-
     <form method="POST" action="/">
         {{ form.csrf_token }}
         {{ form.description.label }}
         {{ form.description }}
         <br>
         <br>
-        {{ form.submit }}
+        <!-- {{ form.submit }} -->
         <p><input type="submit" value="Submit"></p>
     </form>
 
