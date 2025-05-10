@@ -1,5 +1,4 @@
 import redis
-import argparse
 
 import requests
 import json
@@ -7,12 +6,12 @@ import json
 import psycopg2
 
 def main():
-    r = redis.Redis(host='localhost', port=6379, decode_responses=True)
+    r = redis.Redis(host='redis', port=6379, decode_responses=True)
     postgres_conn = psycopg2.connect(
         dbname='playqueue',
         user='lemonade',
         password='supersecureadminpassword',
-        host='localhost',
+        host='postgres',
         port="5432",
     )
     cur = postgres_conn.cursor()
@@ -31,7 +30,7 @@ def main():
             print(f"Got task: {name} with description: {description}. Sending to Ollama...")
             
             # send to ollama
-            url = "http://localhost:11434/api/generate"
+            url = "http://ollama-server:11434/api/generate"
             headers = {
                 "Content-Type": "application/json"
             }
@@ -56,9 +55,22 @@ def main():
             
             cur.execute("INSERT INTO results (description) VALUES (%s);", (actual_response,))
             postgres_conn.commit()
+            
+            # let the frontend know
+            requests.post("http://flask-app:5000/notify", json={"status": "success"})
     except KeyboardInterrupt:
-        print("Exiting gracefully...")
+        print("Keyboard interrupted. Exiting gracefully...")
+        requests.post("http://flask-app:5000/notify", json={"status": "interrupt"})
     
+    except psycopg2.Error as e:
+        print(f"ERROR: Postgres error: {str(e)}")
+        postgres_conn.rollback()
+        requests.post("http://flask-app:5000/notify", json={"status": "error", "error": str(e)})
+        
+    except Exception as e:
+        print(f"ERROR: {str(e)}")
+        requests.post("http://flask-app:5000/notify", json={"status": "error", "error": str(e)})
+        
     finally:
         cur.close()
         postgres_conn.close()

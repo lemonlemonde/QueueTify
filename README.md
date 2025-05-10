@@ -15,65 +15,39 @@ wow!
 
 
 ## I need more details
-Too bad!
+no
 (jk)
 
-Devlog and stuff are in your Obsidian repo, duh. It's called `orange` if you don't remember
+Devlog and stuff are in your Obsidian repo.
+Maybe I should clean it up and put it here?
 
 ## Tech stack:
+- Gunicorn
+- Eventlet
 - PostgreSQL
-- Ansible
 - Redis
 - Docker
+- Flask
+    - Flask-WTF
+    - Flask-SocketIO
+
+## Not yet tech stack:
+- Ansible
+- Make
 - Kubernetes
 - nginx
-- Flask
-- Make
 
 
-## Quick start:
-1. Installations
-- docker
-- ollama
-
-```shell
-ollama pull llama3.2:latest
-```
-
-2. Start up everything
-You'll need different windows cause the processes are all running
-```shell
-ollama serve
-docker compose up
-
-uv init
-uv venv
-uv sync
-
-conda deactivate # if (base) is haunting you
-source .venv/bin/activate
-python worker/worker.py
-```
-
-> [!note] 
-> `docker compose up -d` if you don't wanna see the funky logs
-> and idk how to run Ollama server as detached daemon in macOS....
+## Quick Start with just Docker Compose
+1. `docker compose up`
+2. `docker exec -it ollama-server ollama pull llama3.2:latest`
+    - or do this from Docker desktop
+    - only need to do this once!
+    - unless you delete the image :3
+3. go to browser `localhost:5000`
 
 
-3. Submit a job!
-```shell
-# Example
-python jobs/submit_job.py 
-```
 
-4. Look at results in browser
-```shell
-flask run
-```
-- Go to `http://127.0.0.1:5000/`
-- Reload every time
-
-
-5. Clean up
-- don't do `docker compose down` if you want to persist your `postgres` db
-    - just `CTRL + C`
+## Architecture:
+![image_overarching](./images/IMG_5318.jpg)
+![image_websocket](./images/IMG_5321.jpg)

@@ -1,9 +1,11 @@
-version: '3.8'
 services:
   redis:
     image: redis
     ports: 
       - "6379:6379"
+    networks:
+      - app-net
+
   postgres:
     image: postgres
     environment:
@@ -14,3 +16,46 @@ services:
       - "5432:5432"
     volumes:
       - ./init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - app-net
+
+  ollama-server:
+    image: ollama/ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - app-net
+
+  flask-app:
+    build: ./flask-app/.
+    ports:
+      - "5000:5000"
+    networks:
+      - app-net
+    depends_on:
+      - redis
+      - postgres
+
+  worker:
+    build: ./worker/.
+    ports:
+      - "6420:6420"
+    networks:
+      - app-net
+    depends_on:
+      - redis
+      - postgres
+      - ollama-server
+      - flask-app
+
+volumes:
+  ollama_data:
+    name: ollama_data
+  db_data:
+    name: db_data
+
+networks:
+  app-net:
